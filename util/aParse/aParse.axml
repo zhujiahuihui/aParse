@@ -1,0 +1,841 @@
+
+<!--基础元素-->
+<template name="aParseVideo">
+  <!--增加video标签支持，并循环添加-->
+  <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+    <video class="{{item.classStr}} aParse-{{item.tag}}-video" src="{{item.attr.src}}"></video>
+  </view>
+</template>
+<template name="aParseImg">
+  <image class="{{item.classStr}} aParse-{{item.tag}}" data-from="{{item.from}}" data-src="{{item.attr.src}}" data-idx="{{item.imgIndex}}" src="{{item.attr.src}}" mode="aspectFit" bindload="aParseImgLoad" bindtap="aParseImgTap" mode="widthFix" style="width:{{item.width}}px;" />
+</template>
+<template name="AEmojiView">
+  <view class="AEmojiView aParse-inline" style="{{item.styleStr}}">
+    <block a:for="{{item.textArray}}" a:key="">
+      <block class="{{item.text == '\\n' ? 'aParse-hide':''}}" a:if="{{item.node == 'text'}}">{{item.text}}</block>
+      <block a:elif="{{item.node == 'element'}}">
+        <image class="aEmoji" src="{{item.baseSrc}}{{item.text}}" />
+      </block>
+    </block>
+  </view>
+</template>
+<template name="AParseBr">
+  <text>\n</text>
+</template>
+<!--入口模版-->
+<template name="aParse">
+  <block a:for="{{aParseData}}" a:key="">
+    <template is="aParse0" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse0">
+  <!--<template is="aParse1" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse1" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse1" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse1" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'table'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse1" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse1" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse1" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse1">
+  <!--<template is="aParse2" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse2" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse2" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse2" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse2" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse2" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse2">
+  <!--<template is="aParse3" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse3" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse3" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse3" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse3" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse3" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse3">
+  <!--<template is="aParse4" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse4" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse4" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse4" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse4" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse4" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse4">
+  <!--<template is="aParse5" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse5" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse5" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse5" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse5" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse5" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse5">
+  <!--<template is="aParse6" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse6" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse6" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse6" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse6" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse6" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse6">
+  <!--<template is="aParse7" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse7" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse7" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse7" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse7" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse7" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse7">
+  <!--<template is="aParse8" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse8" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse8" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse8" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse8" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse8" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse8">
+  <!--<template is="aParse9" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse9" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse9" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse9" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse9" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse9" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse9">
+  <!--<template is="aParse10" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse10" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse10" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse10" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse10" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse10" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse10">
+  <!--<template is="aParse11" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse11" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse11" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse11" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse11" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse11" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
+<!--循环模版-->
+<template name="aParse11">
+  <!--<template is="aParse12" data="{{item}}" />-->
+  <!--判断是否是标签节点-->
+  <block a:if="{{item.node == 'element'}}">
+    <block a:if="{{item.tag == 'button'}}">
+      <button type="default" size="mini">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse12" data="{{item}}" />
+        </block>
+      </button>
+    </block>
+    <!--li类型-->
+    <block a:elif="{{item.tag == 'li'}}">
+      <view class="{{item.classStr}} aParse-li" style="{{item.styleStr}}">
+        <view class="{{item.classStr}} aParse-li-inner">
+          <view class="{{item.classStr}} aParse-li-text">
+            <view class="{{item.classStr}} aParse-li-circle"></view>
+          </view>
+          <view class="{{item.classStr}} aParse-li-text">
+            <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+              <template is="aParse12" data="{{item}}" />
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+    <!--video类型-->
+    <block a:elif="{{item.tag == 'video'}}">
+      <template is="aParseVideo" data="{{item}}" />
+    </block>
+    <!--img类型-->
+    <block a:elif="{{item.tag == 'img'}}">
+      <template is="aParseImg" data="{{item}}" />
+    </block>
+    <!--a类型-->
+    <block a:elif="{{item.tag == 'a'}}">
+      <view bindtap="aParseTagATap" class="aParse-inline {{item.classStr}} aParse-{{item.tag}}" data-src="{{item.attr.href}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse12" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <block a:elif="{{item.tag == 'br'}}">
+      <template is="AParseBr"></template>
+    </block>
+    <!--其他块级标签-->
+    <block a:elif="{{item.tagType == 'block'}}">
+      <view class="{{item.classStr}} aParse-{{item.tag}}" style="{{item.styleStr}}">
+        <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+          <template is="aParse12" data="{{item}}" />
+        </block>
+      </view>
+    </block>
+    <!--内联标签-->
+    <view a:else class="{{item.classStr}} aParse-{{item.tag}} aParse-{{item.tagType}}" style="{{item.styleStr}}">
+      <block a:for="{{item.nodes}}" a:for-item="item" a:key="">
+        <template is="aParse12" data="{{item}}" />
+      </block>
+    </view>
+  </block>
+  <!--判断是否是文本节点-->
+  <block a:elif="{{item.node == 'text'}}">
+    <!--如果是，直接进行-->
+    <template is="AEmojiView" data="{{item}}" />
+  </block>
+</template>
